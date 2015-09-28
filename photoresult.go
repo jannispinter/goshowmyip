@@ -1,4 +1,4 @@
-package main 
+package main
 
 type PhotoResult struct {
 	Photo struct {
@@ -20,7 +20,7 @@ type PhotoResult struct {
 			Location   string `json: "location"`
 			IconServer string `json: "iconserver"`
 			IconFarm   int    `json: "iconfarm"`
-			PathAlias  string `json: "path_alias"`
+			Path_Alias string `json: "path_alias"`
 		}
 		Title struct {
 			Content string `json: "_content"`

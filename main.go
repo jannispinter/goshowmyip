@@ -12,7 +12,7 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 // more details.
 
-package main 
+package main
 
 import (
 	"encoding/json"
@@ -43,11 +43,11 @@ func fetchApi(url string) ([]byte, error) {
 	return body, nil
 }
 
-func fetchPhotoDetails(photoId string) (license, user string, err error) {
+func fetchPhotoDetails(photoId string) (license, user, pathAlias string, err error) {
 	api_photo_url := "https://api.flickr.com/services/rest/?api_key=" + api_key + "&method=flickr.photos.getInfo&photo_id=" + photoId + "&format=json&nojsoncallback=1"
 	response, err := fetchApi(api_photo_url)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
 	var photo PhotoResult
@@ -55,16 +55,16 @@ func fetchPhotoDetails(photoId string) (license, user string, err error) {
 
 	license = getLicense(photo.Photo.License)
 	user = photo.Photo.Owner.Username
+	pathAlias = photo.Photo.Owner.Path_Alias
 
-	return license, user, err
-
+	return license, user, pathAlias, err
 }
 
 // fetches a random kitten image and some additional meta data from flickr
-func getRandomKittenPicture() (url, license, user, photoid string) {
+func getRandomKittenPicture() (url, license, user, pathAlias, photoid string) {
 	response, err := fetchApi(api_search_url)
 	if err != nil {
-		return error_url, "", "", ""
+		return error_url, "", "", "", ""
 	}
 
 	var result SearchResult
@@ -72,12 +72,12 @@ func getRandomKittenPicture() (url, license, user, photoid string) {
 	randomPhoto := result.Photos.Photo[rand.Intn(len(result.Photos.Photo))]
 	url = fmt.Sprintf("https://farm%d.staticflickr.com/%s/%s_%s_z.jpg", randomPhoto.Farm, randomPhoto.Server, randomPhoto.Id, randomPhoto.Secret)
 
-	license, user, err = fetchPhotoDetails(randomPhoto.Id)
+	license, user, pathAlias, err = fetchPhotoDetails(randomPhoto.Id)
 	if err != nil {
-		return error_url, "", "", ""
+		return error_url, "", "", "", ""
 	}
 
-	return url, license, user, randomPhoto.Id
+	return url, license, user, pathAlias, randomPhoto.Id
 }
 
 // helper function to convert a license id into human readable text
@@ -106,8 +106,8 @@ func getLicense(id string) string {
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	template := "<html><head><title>Whats my IP and UA</title></head><body><center><h1>Your IP address is:</h1>%s<h3>Your user agent is:</h3>%s<h3>Your random kitten picture:</h3><img src=\"%s\"/><br><small>%s <a href=\"https://www.flickr.com/photos/%s/%s/\">%s</a></small></center></body></html>"
 
-	url, license, user, photoid := getRandomKittenPicture()
-	fmt.Fprintf(w, template, r.Header.Get("X-Real-IP"), r.UserAgent(), url, license, user, photoid, user)
+	url, license, user, pathAlias, photoid := getRandomKittenPicture()
+	fmt.Fprintf(w, template, r.Header.Get("X-Real-IP"), r.UserAgent(), url, license, pathAlias, photoid, user)
 }
 
 func main() {

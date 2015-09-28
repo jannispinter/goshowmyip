@@ -2,7 +2,7 @@
 A simple IP address and User Agent displaying web app written in Go. As an additional gimmick, the web app fetches random kitten pictures from flickr.
 
 # Installation
-The idea is to run this behind a reverse proxy, preferably nginx. You need to add an additional Header to preserve the original IP address.
+The idea is to run this behind a reverse proxy, preferably nginx. You need to add an additional header to preserve the original IP address.
 
 Clone the source code and build the program:
 ```sh
